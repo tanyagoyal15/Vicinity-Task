@@ -9,13 +9,15 @@ export default class App extends Component {
     this.state = {
       articles : [],
       channels : [],
-      sourceClicked : '',
-      category : ''
+      channelClicked : '',
+      search: ''
+      // categories : [],
+      // filterNews : '',
+      // categoryClicked : ''
     }
     this.handleClick = this.handleClick.bind(this);
     this.handleChange = this.handleChange.bind(this);
-    // this.handleChangeCountry = this.handleChangeCountry.bind(this);
-    // this.handleChangeCategory = this.handleChange.bind(this);
+    this.handleInput = this.handleInput.bind(this);
     this.fetchNews = this.fetchNews.bind(this);
   }
 
@@ -24,37 +26,102 @@ export default class App extends Component {
     .then(response => response.json())
     .then(response => this.setState({
       channels : response.sources
+      // categories : response.sources
     }))
   }
 
   handleChange(e) {
-    this.setState({sourceClicked: e.target.value});
-    console.log("Hello");
+      this.setState({channelClicked: e.target.value});
+      console.log("channel clicked");
   }
 
   handleClick(e) {
-    console.log(this.state.sourceClicked);
-    this.fetchNews(this.state.sourceClicked);
+    console.log(this.state.channelClicked);
+    this.fetchNews(this.state.channelClicked);
   }
 
-  fetchNews(sourceClicked) {
-    fetch("https://newsapi.org/v2/top-headlines?sources=" + sourceClicked +"&apiKey=728c6352a8444ac4a0cd7dd69715a3f2")
+  handleInput(e) {
+    this.setState({search : e.target.value})
+  }
+  // handleSearch(e) {
+  //   this.setState({search: e.target.value});
+  //   console.log("You searched");
+  //   this.searchArticles();
+  // }
+
+
+  // searchArticles() {
+  //   console.log("Hello");
+  //   this.setState(state => {
+
+  //   if(state.search!=='') {
+  //     return { filteredArticles : state.articles.filter(a =>
+  //       a.content.indexOf(state.search) >=0 
+  //     )}
+  //   }
+  //     return { filteredArticles: state.articles }
+  //   })
+  // }
+
+  fetchNews(channelClicked) {
+    fetch("https://newsapi.org/v2/top-headlines?sources=" + channelClicked +"&apiKey=728c6352a8444ac4a0cd7dd69715a3f2")
     .then(response => response.json())
     .then(response => this.setState({
-      articles : response.articles
+      articles : response.articles,
+      filteredArticles : response.filteredArticles
     }))
+    // .then(response => console.log(response.articles))
   }
 
+
+  // filterNews(categoryClicked) {
+  //   fetch("https://newsapi.org/v2/top-headlines?country=de&category=" + categoryClicked +"&apiKey=728c6352a8444ac4a0cd7dd69715a3f2")
+  //   .then(response => response.json())
+  //   .then(response => console.log(response.articles))
+  // }
+
+  // handleChangeCategory(e) {
+  //   // this.setState({category : e.target.value});
+  //   this.filterNews(); 
+  // }
+
+  // filterNews(){
+  //    fetch('https://newsapi.org/v2/top-headlines?country=de&category=general&apiKey=728c6352a8444ac4a0cd7dd69715a3f2')
+  //   .then(response => response.json())
+  //   .then(response => console.log(response.articles))
+
+  // }
+  // filterNews() {
+  //   this.setState(state => {
+
+  //   if(state.category!=='') {
+  //     return { filterNews : state.articles.filter(a =>
+  //       a.type.indexOf(state.type) >=0  && a.location.indexOf(state.location.toUpperCase())>=0
+  //       )}
+  //   }
+  //     return { filterNews: state.articles }
+  //   })
+  // }
+
   render() {
+    let filteredArticles = this.state.articles.filter((article) => {
+      return article.author.toLowerCase().includes(this.state.search.toLowerCase()) || 
+      article.content.toLowerCase().includes(this.state.search.toLowerCase()) || 
+      article.description.toLowerCase().includes(this.state.search.toLowerCase()) ||
+      article.publishedAt.toLowerCase().includes(this.state.search.toLowerCase()) ||
+      article.title.toLowerCase().includes(this.state.search.toLowerCase()) ||
+      article.url.toLowerCase().includes(this.state.search.toLowerCase())
+    })
   return (
     <div className="App">
-      <h1>News App</h1>
-      <Filter     handleChangeCountry={this.handleChangeCountry} 
-                  handleChangeCategory={this.handleChangeCategory} />
-      <Channels channels={this.state.channels} sourceClicked={this.state.sourceClicked}
+      <h1>News App</h1> 
+      <Channels channels={this.state.channels} 
+                channelClicked={this.state.channelClicked} 
                 handleClick={this.handleClick}
-                handleChange={this.handleChange}/>
-      <News articles={this.state.articles}/>
+                handleChange={this.handleChange}
+                />
+      <Filter handleInput={this.handleInput}/>
+      <News filteredArticles={filteredArticles} />   
     </div>
   );
 }

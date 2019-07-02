@@ -5,7 +5,7 @@ export default class Filter extends Component {
 		return (
 			<div className="container">
 				<div className="row">
-					Hello Filter
+            		<input onChange={(e) => this.props.handleInput(e)}/>		
 				</div>
 			</div>
 		)
